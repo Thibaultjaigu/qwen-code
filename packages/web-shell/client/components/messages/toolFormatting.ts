@@ -1,6 +1,6 @@
 import type { ACPToolCall } from '../../adapters/types';
 
-const TOOL_DISPLAY_NAMES: Record<string, string> = {
+export const TOOL_DISPLAY_NAMES: Record<string, string> = {
   edit: 'Edit',
   write_file: 'WriteFile',
   read_file: 'ReadFile',
@@ -27,6 +27,13 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
   tool_search: 'ToolSearch',
   enter_worktree: 'EnterWorktree',
   exit_worktree: 'ExitWorktree',
+  enter_plan_mode: 'EnterPlanMode',
+  task_create: 'TaskCreate',
+  task_update: 'TaskUpdate',
+  task_list: 'TaskList',
+  team_create: 'TeamCreate',
+  team_delete: 'TeamDelete',
+  workflow: 'Workflow',
   web_search: 'WebSearch',
   bash: 'Shell',
   shell: 'Shell Command',
@@ -39,6 +46,21 @@ export function formatToolDisplayName(toolName: string): string {
   return TOOL_DISPLAY_NAMES[toolName] ?? toolName;
 }
 
+/**
+ * Locale-aware tool display name for chat-stream badges. Looks up the
+ * `toolName.<wire_name>` i18n key; when the active language has no entry the
+ * translator returns the key verbatim, in which case we fall back to the
+ * English {@link formatToolDisplayName}. Pass the `t` from `useI18n()`.
+ */
+export function localizeToolDisplayName(
+  toolName: string,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
+  const key = `toolName.${toolName}`;
+  const translated = t(key);
+  return translated === key ? formatToolDisplayName(toolName) : translated;
+}
+
 export function isAskUserQuestionToolName(toolName: string): boolean {
   const normalized = toolName.toLowerCase();
   return normalized === 'ask_user_question' || normalized === 'askuserquestion';
@@ -49,14 +71,21 @@ export function truncateText(text: string, max: number): string {
   return text.slice(0, max) + '...';
 }
 
+// The tool-header description is shown single-line (CSS-ellipsised) when the
+// row is collapsed and fully wrapped when it is expanded, so we keep the whole
+// string rather than hard-capping it at a line's worth of characters. A
+// generous ceiling still guards against a pathological multi-megabyte command
+// bloating the DOM.
+const MAX_DESCRIPTION_LENGTH = 2000;
+
 export function getToolDescription(
   tool: ACPToolCall,
   workspaceCwd?: string,
 ): string {
   const fromTitle = getDescriptionFromTitle(tool, workspaceCwd);
-  if (fromTitle) return truncateText(fromTitle, 120);
+  if (fromTitle) return truncateText(fromTitle, MAX_DESCRIPTION_LENGTH);
   const fromArgs = getDescriptionFromArgs(tool, workspaceCwd);
-  if (fromArgs) return truncateText(fromArgs, 120);
+  if (fromArgs) return truncateText(fromArgs, MAX_DESCRIPTION_LENGTH);
   return '';
 }
 
@@ -177,7 +206,7 @@ function getDescriptionFromArgs(
     if (args.description) {
       description += ` (${String(args.description).replace(/\n/g, ' ')})`;
     }
-    return truncateText(description, 120);
+    return truncateText(description, MAX_DESCRIPTION_LENGTH);
   }
   if (name === 'grep_search' || name === 'grep' || name === 'search') {
     const pattern = args.pattern ?? args.query;
@@ -371,13 +400,16 @@ export function getAgentDescription(agent: ACPToolCall): string {
   return '';
 }
 
-export function getAgentCurrentToolHint(agent: ACPToolCall): string {
+export function getAgentCurrentToolHint(
+  agent: ACPToolCall,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   if (agent.status !== 'in_progress') return '';
   const subs = agent.subTools;
   if (!subs || subs.length === 0) return '';
   const last = subs[subs.length - 1];
   if (last.status !== 'in_progress' && last.status !== 'pending') return '';
-  let hint = last.toolName;
+  let hint = localizeToolDisplayName(last.toolName ?? '', t);
   if (last.title) {
     const colonIdx = last.title.indexOf(': ');
     hint += ' ' + (colonIdx > 0 ? last.title.slice(colonIdx + 2) : last.title);

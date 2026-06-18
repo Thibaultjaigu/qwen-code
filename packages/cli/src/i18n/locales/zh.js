@@ -8,6 +8,51 @@
 
 export default {
   // ============================================================================
+  // Tool display names (chat-stream badge labels)
+  // ----------------------------------------------------------------------------
+  // Keyed by `toolDisplayName.<English display name>` (from core
+  // `ToolDisplayNames`). The namespace prevents collisions with same-spelled
+  // generic UI strings (e.g. a standalone "Shell"). A missing key falls back to
+  // the English display name via `localizeToolDisplayName`. Proper tool names /
+  // acronyms are kept in English (Agent, Grep, Glob, LSP), as is a product name
+  // inside an otherwise-translated label (e.g. `Notebook`).
+  // ============================================================================
+  'toolDisplayName.Edit': '编辑',
+  'toolDisplayName.WriteFile': '写入文件',
+  'toolDisplayName.ReadFile': '读取文件',
+  'toolDisplayName.Grep': 'Grep',
+  'toolDisplayName.Glob': 'Glob',
+  'toolDisplayName.Shell': '运行命令',
+  'toolDisplayName.Shell Command': 'Shell 命令',
+  'toolDisplayName.TodoWrite': '任务清单',
+  'toolDisplayName.SaveMemory': '保存记忆',
+  'toolDisplayName.Agent': 'Agent',
+  'toolDisplayName.Skill': '技能',
+  'toolDisplayName.EnterPlanMode': '进入计划模式',
+  'toolDisplayName.ExitPlanMode': '退出计划模式',
+  'toolDisplayName.WebFetch': '网络抓取',
+  'toolDisplayName.WebSearch': '网络搜索',
+  'toolDisplayName.ListFiles': '列出文件',
+  'toolDisplayName.Lsp': 'LSP',
+  'toolDisplayName.AskUserQuestion': '询问用户',
+  'toolDisplayName.CronCreate': '创建定时任务',
+  'toolDisplayName.CronList': '定时任务列表',
+  'toolDisplayName.CronDelete': '删除定时任务',
+  'toolDisplayName.TaskCreate': '创建任务',
+  'toolDisplayName.TaskUpdate': '更新任务',
+  'toolDisplayName.TaskList': '任务列表',
+  'toolDisplayName.TaskStop': '停止任务',
+  'toolDisplayName.TeamCreate': '创建团队',
+  'toolDisplayName.TeamDelete': '删除团队',
+  'toolDisplayName.SendMessage': '发送消息',
+  'toolDisplayName.StructuredOutput': '结构化输出',
+  'toolDisplayName.Monitor': '监控',
+  'toolDisplayName.NotebookEdit': '编辑 Notebook',
+  'toolDisplayName.ToolSearch': '工具搜索',
+  'toolDisplayName.EnterWorktree': '进入 Worktree',
+  'toolDisplayName.ExitWorktree': '退出 Worktree',
+  'toolDisplayName.Workflow': '工作流',
+  // ============================================================================
   // Help / UI Components
   // ============================================================================
   // Attachment hints
@@ -224,8 +269,8 @@ export default {
     '在浏览器中打开完整的 Qwen Code 文档',
   'Configuration not available.': '配置不可用',
   'Connect an LLM provider': '连接 LLM 提供商',
-  'Copy the last AI response to clipboard (/copy N for Nth-latest)':
-    '将最近的 AI 回复复制到剪贴板（/copy N 复制倒数第 N 条）',
+  'Copy to clipboard: reply, code (by lang), LaTeX, or Mermaid. N = Nth-latest message, index = block number':
+    '复制到剪贴板：AI 回复、代码块（可按语言筛选）、LaTeX 或 Mermaid。N 为倒数第 N 条消息，index 为代码块序号',
   'Show working-tree change stats versus HEAD':
     '显示工作区相对 HEAD 的变更统计',
   'Could not determine current working directory.': '无法确定当前工作目录。',
@@ -922,6 +967,7 @@ export default {
   'No managed auto-memory entries matched: {{query}}':
     '没有匹配的托管自动记忆条目：{{query}}',
   'Consolidate managed auto-memory topic files.': '整理托管自动记忆主题文件',
+  'Import MCP servers from Claude configs': '从 Claude 配置导入 MCP 服务器',
   'Open MCP management dialog': '打开 MCP 管理对话框',
   'Could not retrieve tool registry.': '无法检索工具注册表',
   "Successfully authenticated and refreshed tools for '{{name}}'.":

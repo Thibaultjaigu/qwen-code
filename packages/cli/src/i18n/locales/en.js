@@ -9,6 +9,50 @@
 
 export default {
   // ============================================================================
+  // Tool display names (chat-stream badge labels)
+  // ----------------------------------------------------------------------------
+  // Namespaced `toolDisplayName.<English display name>` keys (from core
+  // `ToolDisplayNames`). Per this file's key-is-default-text convention each
+  // English entry maps to itself; `localizeToolDisplayName` detects that
+  // self-mapping and returns the bare display name. Localized values live in
+  // zh.js / zh-TW.js; other locales fall back to the English display name.
+  // ============================================================================
+  'toolDisplayName.Edit': 'toolDisplayName.Edit',
+  'toolDisplayName.WriteFile': 'toolDisplayName.WriteFile',
+  'toolDisplayName.ReadFile': 'toolDisplayName.ReadFile',
+  'toolDisplayName.Grep': 'toolDisplayName.Grep',
+  'toolDisplayName.Glob': 'toolDisplayName.Glob',
+  'toolDisplayName.Shell': 'toolDisplayName.Shell',
+  'toolDisplayName.Shell Command': 'toolDisplayName.Shell Command',
+  'toolDisplayName.TodoWrite': 'toolDisplayName.TodoWrite',
+  'toolDisplayName.SaveMemory': 'toolDisplayName.SaveMemory',
+  'toolDisplayName.Agent': 'toolDisplayName.Agent',
+  'toolDisplayName.Skill': 'toolDisplayName.Skill',
+  'toolDisplayName.EnterPlanMode': 'toolDisplayName.EnterPlanMode',
+  'toolDisplayName.ExitPlanMode': 'toolDisplayName.ExitPlanMode',
+  'toolDisplayName.WebFetch': 'toolDisplayName.WebFetch',
+  'toolDisplayName.WebSearch': 'toolDisplayName.WebSearch',
+  'toolDisplayName.ListFiles': 'toolDisplayName.ListFiles',
+  'toolDisplayName.Lsp': 'toolDisplayName.Lsp',
+  'toolDisplayName.AskUserQuestion': 'toolDisplayName.AskUserQuestion',
+  'toolDisplayName.CronCreate': 'toolDisplayName.CronCreate',
+  'toolDisplayName.CronList': 'toolDisplayName.CronList',
+  'toolDisplayName.CronDelete': 'toolDisplayName.CronDelete',
+  'toolDisplayName.TaskCreate': 'toolDisplayName.TaskCreate',
+  'toolDisplayName.TaskUpdate': 'toolDisplayName.TaskUpdate',
+  'toolDisplayName.TaskList': 'toolDisplayName.TaskList',
+  'toolDisplayName.TaskStop': 'toolDisplayName.TaskStop',
+  'toolDisplayName.TeamCreate': 'toolDisplayName.TeamCreate',
+  'toolDisplayName.TeamDelete': 'toolDisplayName.TeamDelete',
+  'toolDisplayName.SendMessage': 'toolDisplayName.SendMessage',
+  'toolDisplayName.StructuredOutput': 'toolDisplayName.StructuredOutput',
+  'toolDisplayName.Monitor': 'toolDisplayName.Monitor',
+  'toolDisplayName.NotebookEdit': 'toolDisplayName.NotebookEdit',
+  'toolDisplayName.ToolSearch': 'toolDisplayName.ToolSearch',
+  'toolDisplayName.EnterWorktree': 'toolDisplayName.EnterWorktree',
+  'toolDisplayName.ExitWorktree': 'toolDisplayName.ExitWorktree',
+  'toolDisplayName.Workflow': 'toolDisplayName.Workflow',
+  // ============================================================================
   // Help / UI Components
   // ============================================================================
   // Attachment hints
@@ -232,8 +276,8 @@ export default {
     'open full Qwen Code documentation in your browser',
   'Configuration not available.': 'Configuration not available.',
   'Connect an LLM provider': 'Connect an LLM provider',
-  'Copy the last AI response to clipboard (/copy N for Nth-latest)':
-    'Copy the last AI response to clipboard (/copy N for Nth-latest)',
+  'Copy to clipboard: reply, code (by lang), LaTeX, or Mermaid. N = Nth-latest message, index = block number':
+    'Copy to clipboard: reply, code (by lang), LaTeX, or Mermaid. N = Nth-latest message, index = block number',
   'Show working-tree change stats versus HEAD':
     'Show working-tree change stats versus HEAD',
   'Could not determine current working directory.':
@@ -976,6 +1020,8 @@ export default {
     'No managed auto-memory entries matched: {{query}}',
   'Consolidate managed auto-memory topic files.':
     'Consolidate managed auto-memory topic files.',
+  'Import MCP servers from Claude configs':
+    'Import MCP servers from Claude configs',
   'Open MCP management dialog': 'Open MCP management dialog',
   'Could not retrieve tool registry.': 'Could not retrieve tool registry.',
   "Successfully authenticated and refreshed tools for '{{name}}'.":

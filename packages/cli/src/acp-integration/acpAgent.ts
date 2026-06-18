@@ -5799,6 +5799,14 @@ class QwenAgent implements Agent {
         const session = this.sessionOrThrow(sessionId);
         const config = session.getConfig();
         const cleared = unregisterGoalHook(config, sessionId);
+        if (cleared) {
+          session.emitGoalStatus({
+            kind: 'cleared',
+            condition: cleared.condition,
+            iterations: cleared.iterations,
+            durationMs: Date.now() - cleared.setAt,
+          });
+        }
         debugLogger.info(
           `sessionGoalClear sessionId=${sessionId} cleared=${!!cleared} condition=${cleared?.condition ?? '(none)'}`,
         );
@@ -6145,6 +6153,16 @@ class QwenAgent implements Agent {
           sendUpdate: async (update) => {
             updates.push(update);
           },
+          // Fresh accumulator for this replay: MessageEmitter advances it from
+          // replayed usage metadata (tokens only — no per-turn durations) and
+          // PlanEmitter snapshots it onto each todo update, so resumed sessions
+          // recover per-task token spend (API time stays live-only).
+          cumulativeUsage: {
+            promptTokens: 0,
+            cachedTokens: 0,
+            candidateTokens: 0,
+            apiTimeMs: 0,
+          },
         };
         let replayError: string | undefined;
         try {
@@ -6317,6 +6335,13 @@ class QwenAgent implements Agent {
         );
         const scope = toSettingsScope(params['scope']);
         settings.setValue(scope, key, normalizedValue);
+        if (settingKey === 'model.name') {
+          // Selecting a model by id here can't disambiguate providers that
+          // share that id, so clear the paired baseUrl disambiguator left by a
+          // previous model-picker selection. Empty-string tombstone overrides a
+          // lower-scope value on merge (undefined would be dropped from JSON).
+          settings.setValue(scope, 'model.baseUrl', '');
+        }
         if (
           settingKey === 'general.outputLanguage' &&
           typeof normalizedValue === 'string' &&
@@ -6759,7 +6784,10 @@ class QwenAgent implements Agent {
       settings,
       argvForSession,
       cwd,
-      [],
+      // ACP sessions do not provide an extension override. Passing [] is a
+      // truthy override and prevents default/argv extension commands from
+      // loading, so leave it unset to preserve normal CLI behavior.
+      undefined,
       // Pass separated hooks for proper source attribution
       {
         userHooks: this.settings.getUserHooks(),
@@ -6912,6 +6940,9 @@ class QwenAgent implements Agent {
 
     // Install rewriter AFTER history replay to avoid rewriting historical messages
     session.installRewriter();
+
+    // After replay so a durable cron fire can't interleave with it.
+    session.startCronScheduler();
 
     return session;
   }

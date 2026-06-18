@@ -1015,6 +1015,7 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
   let lastSessionMock:
     | {
         captureHistorySnapshot: ReturnType<typeof vi.fn>;
+        emitGoalStatus: ReturnType<typeof vi.fn>;
         restoreHistory: ReturnType<typeof vi.fn>;
         rewindToTurn: ReturnType<typeof vi.fn>;
       }
@@ -1138,6 +1139,7 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
           sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
           replayHistory: vi.fn().mockResolvedValue(undefined),
           installRewriter: vi.fn(),
+          startCronScheduler: vi.fn(),
         }) as unknown as InstanceType<typeof Session>,
     );
 
@@ -1315,7 +1317,9 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
         sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
         replayHistory: vi.fn().mockResolvedValue(undefined),
         installRewriter: vi.fn(),
+        startCronScheduler: vi.fn(),
         dispose: vi.fn(),
+        emitGoalStatus: vi.fn(),
         captureHistorySnapshot: vi
           .fn()
           .mockReturnValue([{ role: 'user', parts: [{ text: 'before' }] }]),
@@ -2297,6 +2301,12 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
       }),
     ).resolves.toEqual({ cleared: true, condition: 'ship it' });
     expect(unregisterGoalHook).toHaveBeenCalledWith(innerConfig, sessionId);
+    expect(lastSessionMock?.emitGoalStatus).toHaveBeenCalledWith({
+      kind: 'cleared',
+      condition: 'ship it',
+      iterations: 1,
+      durationMs: expect.any(Number),
+    });
 
     mockConnectionState.resolve();
     await agentPromise;
@@ -2505,6 +2515,28 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
       workspace: expect.objectContaining({ values: expect.anything() }),
       merged: expect.objectContaining({ values: expect.anything() }),
     });
+
+    mockConnectionState.resolve();
+    await agentPromise;
+  });
+
+  it('qwen/settings/setCoreValue clears model.baseUrl when setting model.name', async () => {
+    const settings = makeCoreSettings();
+    const { agent, agentPromise } = await bootCoreSettingsAgent(settings);
+
+    await agent.extMethod('qwen/settings/setCoreValue', {
+      scope: 'user',
+      key: 'model.name',
+      value: 'qwen3.7-max',
+    });
+
+    expect(settings.setValue).toHaveBeenCalledWith(
+      'User',
+      'model.name',
+      'qwen3.7-max',
+    );
+    // Id-only selection must clear the paired baseUrl disambiguator (tombstone).
+    expect(settings.setValue).toHaveBeenCalledWith('User', 'model.baseUrl', '');
 
     mockConnectionState.resolve();
     await agentPromise;
@@ -4194,6 +4226,7 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
         sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
         replayHistory: vi.fn().mockResolvedValue(undefined),
         installRewriter: vi.fn(),
+        startCronScheduler: vi.fn(),
         dispose: vi.fn(),
       } as unknown as InstanceType<typeof Session>;
     });
@@ -4785,6 +4818,30 @@ describe('QwenAgent MCP SSE/HTTP support', () => {
     mockConnectionState.resolve();
     await agentPromise;
   });
+
+  it('passes undefined (not []) as the extension override to loadCliConfig', async () => {
+    await setupSessionMocks('session-ext-override');
+
+    const agentPromise = runAcpAgent(
+      mockConfig,
+      makeSessionSettings(),
+      mockArgv,
+    );
+    await vi.waitFor(() => expect(capturedAgentFactory).toBeDefined());
+    const agent = capturedAgentFactory!({
+      get closed() {
+        return mockConnectionState.promise;
+      },
+    }) as AgentLike;
+
+    await agent.newSession({ cwd: '/tmp', mcpServers: [] });
+
+    // [] is truthy and silently blocks all extension commands (#5216).
+    expect(vi.mocked(loadCliConfig).mock.calls[0]?.[3]).toBeUndefined();
+
+    mockConnectionState.resolve();
+    await agentPromise;
+  });
 });
 
 // Regression coverage for the MR-review finding that ACP renameSession
@@ -4904,6 +4961,7 @@ describe('QwenAgent extMethod renameSession routing', () => {
           sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
           replayHistory: vi.fn().mockResolvedValue(undefined),
           installRewriter: vi.fn(),
+          startCronScheduler: vi.fn(),
           dispose: vi.fn(),
         }) as unknown as InstanceType<typeof Session>,
     );
@@ -5163,6 +5221,7 @@ describe('QwenAgent loadSession / unstable_resumeSession', () => {
         sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
         replayHistory: vi.fn().mockResolvedValue(undefined),
         installRewriter: vi.fn(),
+        startCronScheduler: vi.fn(),
         dispose: vi.fn(),
       };
       lastSessionMock = sessionMock;
@@ -5875,6 +5934,7 @@ describe('sessionLanguage multi-session propagation', () => {
         getConfig: vi.fn().mockReturnValue(cfg),
         sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
         installRewriter: vi.fn(),
+        startCronScheduler: vi.fn(),
         dispose: vi.fn(),
       };
       sessionIdx++;
@@ -5974,6 +6034,7 @@ describe('sessionLanguage multi-session propagation', () => {
         getConfig: vi.fn().mockReturnValue(cfg),
         sendAvailableCommandsUpdate: vi.fn().mockResolvedValue(undefined),
         installRewriter: vi.fn(),
+        startCronScheduler: vi.fn(),
         dispose: vi.fn(),
       } as unknown as InstanceType<typeof Session>;
     });
